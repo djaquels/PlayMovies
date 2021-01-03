@@ -24,11 +24,34 @@ class MovieRepository @Inject() (
     db.run(movieQuery.schema.createIfNotExists)
   }
 
-  def getAll = ???
-  def getOne = ???
-  def create = ???
-  def update = ???
-  def delete = ???
+  def getAll = {
+    val q = movieQuery.sortBy(x => x.id)
+    db.run(q.result)
+  }
+  def getOne(id: String) = {
+    val q = movieQuery.filter(_.id === id)
+    db.run(q.result.headOption)
+  }
+  def create(movie: Movie) = {
+    val instert =movieQuery += movie
+    db.run(instert)
+      .flatMap(_ => getOne(movie.id.getOrElse("")))
+
+  }
+  def update(id: String, movie: Movie) = {
+    val q = movieQuery.filter(_.id === movie.id && movie.id.contains(id))
+    val update = q.update(movie)
+    db.run(update)
+      .flatMap(_ => db.run(q.result.headOption))
+
+  }
+  def delete(id: String) = {
+    val q = movieQuery.filter(_.id === id)
+    for {
+      objecto <- db.run(q.result.headOption)
+      _ <-db.run(q.delete)
+    }yield objecto
+  }
 }
 
 
