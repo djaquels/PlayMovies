@@ -5,4 +5,5 @@ target
 /.classpath
 /.project
 /.settings
+/.sbt-dist/*
 /RUNNING_PID
